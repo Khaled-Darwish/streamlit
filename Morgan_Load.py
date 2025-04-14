@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import joblib
 from rdkit import Chem, DataStructs
-from rdkit.Chem.rdmolops import MorganGenerator
+from rdkit.Chem import MorganGenerator
 from io import StringIO
 
 # ---------------- Setup Morgan Generator ----------------
