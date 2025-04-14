@@ -31,10 +31,10 @@ pyrsistent
 python-dateutil
 pytz
 pytz-deprecation-shim
-rdkit
+rdkit-pypi
 requests
 rich
-scikit-learn
+scikit-learn==1.6.1
 scipy
 semver
 six
