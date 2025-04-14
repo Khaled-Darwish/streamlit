@@ -1,8 +1,6 @@
 import streamlit as st
 import numpy as np
 from rdkit import Chem
-from rdkit.Chem import AllChem, Draw
-from rdkit.Chem.Draw import MolToImage
 from sklearn.ensemble import RandomForestRegressor
 import pickle
 
