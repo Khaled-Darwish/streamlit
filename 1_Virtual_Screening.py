@@ -52,12 +52,7 @@ if st.button('Predict'):
     st.markdown(reading_data.to_html(escape=False, index=False), unsafe_allow_html=True)
    ## st.write(reading_data)
 
-    st.subheader('Generated PubChem_Fingerprints')
-    pubfp_calc = pd.read_csv("descriptors_output.csv")
-    pubfp_calc.drop('Name', axis=1, inplace=True)
-    st.write(pubfp_calc)
-    st.write(pubfp_calc.shape)
-   
+  
     first_column = reading_data.iloc[:, 0] 
     Mol_descriptors,desc_names =descriptors(first_column)
     df_with_200_descriptors = pd.DataFrame(Mol_descriptors,columns=desc_names)
