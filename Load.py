@@ -1,89 +1,98 @@
 import streamlit as st
-import pandas as pd
 import numpy as np
 from rdkit import Chem
+from rdkit.Chem import AllChem, Draw
+from rdkit.Chem.Draw import MolToImage
 from sklearn.ensemble import RandomForestRegressor
 import pickle
-import os
 
 # App title and description
 st.title('Compound Activity Predictor (IC50)')
 st.write("""
-This app predicts the biological activity (IC50) of input compounds using a Random Forest model trained on PubChem fingerprints.
+Predict IC50 values from SMILES strings using a Random Forest model trained on PubChem fingerprints.
 """)
 
 # Sidebar
 st.sidebar.header('About')
 st.sidebar.info("""
-- Input: SMILES notation of chemical compound
-- Model: Random Forest trained on PubChem fingerprints
-- Output: Predicted IC50 value (nM)
+- **Input**: Valid SMILES notation (e.g., `CCO` for ethanol)
+- **Model**: Random Forest (PubChem fingerprints)
+- **Output**: Predicted IC50 (nM)
 """)
 
-# Function to compute PubChem fingerprints
+# Function to validate SMILES and compute fingerprints
 def smiles_to_pubchem_fp(smiles):
     try:
         mol = Chem.MolFromSmiles(smiles)
         if mol is None:
+            st.error("❌ Invalid SMILES: Could not parse molecule.")
             return None
+        
+        # Add Hydrogens (optional, improves fingerprint accuracy)
+        mol = Chem.AddHs(mol)  
+        
+        # Generate hashed Morgan fingerprint (radius=2, nBits=881)
         fp = AllChem.GetHashedMorganFingerprint(mol, radius=2, nBits=881)
         return np.array(fp)
-    except:
+    except Exception as e:
+        st.error(f"❌ Error generating fingerprint: {str(e)}")
         return None
 
-# Load model function
+# Load model (replace with your trained model)
 def load_model():
-    # In a real app, you would load your pretrained model
-    # Example:
-    if os.path.exists('model.pkl'):
-         return pickle.load(open('model.pkl', 'rb'))
+    try:
+        # Example: Load a pre-trained model
+        model = pickle.load(open("model.pkl", "rb"))
         
-    return model
+        return model
+    except Exception as e:
+        st.error(f"❌ Model loading failed: {str(e)}")
+        return None
 
-# Load the model (only once when app starts)
-if 'model' not in st.session_state:
+# Cache the model to avoid reloading
+if "model" not in st.session_state:
     st.session_state.model = load_model()
 
 # Input SMILES
-smiles_input = st.text_input('Enter SMILES notation:', 'CCO')
+smiles_input = st.text_input(
+    "Enter SMILES notation:",
+    placeholder="e.g., CCO (ethanol), CC(=O)O (acetic acid)",
+    value="CCO"  # Default example
+)
 
-if st.button('Predict IC50'):
-    if not smiles_input:
-        st.warning('Please enter a SMILES string.')
+if st.button("Predict IC50"):
+    if not smiles_input.strip():
+        st.warning("⚠️ Please enter a SMILES string.")
     else:
-        # Convert SMILES to fingerprint
-        fp = smiles_to_pubchem_fp(smiles_input)
-        
-        if fp is None:
-            st.error('Invalid SMILES string or unable to generate fingerprint.')
+        # Check SMILES validity first
+        mol = Chem.MolFromSmiles(smiles_input)
+        if mol is None:
+            st.error("❌ Invalid SMILES format. Example valid SMILES: `CCO` (ethanol)")
         else:
-            # Make prediction using the model (not the fingerprint)
-            try:
-                # Reshape the fingerprint for prediction (1 sample, many features)
-                fp_reshaped = fp.reshape(1, -1)
-                
-                # Get model from session state
-                model = st.session_state.model
-                
-                # Predict
-                prediction = model.predict(fp_reshaped)[0]
-                st.success(f'Predicted IC50: {prediction:.2f} nM')
-                
-                # Display molecule
-                mol = Chem.MolFromSmiles(smiles_input)
-                if mol:
-                    st.write('Chemical structure:')
-                    img = Draw.MolToImage(mol, size=(300, 300))
-                    st.image(img, caption='Input Molecule')
-                
-            except Exception as e:
-                st.error(f'Prediction failed: {str(e)}')
+            # Generate fingerprint
+            fp = smiles_to_pubchem_fp(smiles_input)
+            if fp is not None:
+                try:
+                    # Predict IC50
+                    model = st.session_state.model
+                    ic50_pred = model.predict(fp.reshape(1, -1))[0]
+                    st.success(f"✅ Predicted IC50: **{ic50_pred:.2f} nM**")
+                    
+                    # Display molecule
+                    st.subheader("Molecule Structure")
+                    img = MolToImage(mol, size=(400, 400))
+                    st.image(img, caption=f"SMILES: {smiles_input}")
+                except Exception as e:
+                    st.error(f"❌ Prediction failed: {str(e)}")
 
 # Example SMILES
-st.subheader('Example SMILES')
-st.write("""
-Try these example SMILES strings:
-- Aspirin: CC(=O)OC1=CC=CC=C1C(=O)O
-- Caffeine: CN1C=NC2=C1C(=O)N(C(=O)N2C)C
-- Glucose: C(C1C(C(C(C(O1)O)O)O)O
-""")
+st.subheader("Example SMILES")
+examples = {
+    "Aspirin": "CC(=O)OC1=CC=CC=C1C(=O)O",
+    "Caffeine": "CN1C=NC2=C1C(=O)N(C(=O)N2C)C",
+    "Paracetamol": "CC(=O)NC1=CC=C(C=C1)O",
+    "Glucose": "C(C1C(C(C(C(O1)O)O)O)O",
+}
+
+for name, smiles in examples.items():
+    st.write(f"- **{name}**: `{smiles}`")
