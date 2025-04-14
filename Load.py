@@ -38,18 +38,8 @@ def load_model():
     # Try to load a pretrained model
     try:
         # In a real app, you would load your saved model file
-        # Example: model = pickle.load(open('rf_pubchem_model.pkl', 'rb'))
-        
-        # For demonstration, we'll create a dummy model
-        # DON'T DO THIS IN PRODUCTION - USE YOUR TRAINED MODEL
-        model = RandomForestRegressor(n_estimators=100, random_state=42)
-        
-        # Create dummy data to fit (so the app runs without error)
-        # In production, remove this and use your actual trained model
-        X_dummy = np.random.rand(10, 881)
-        y_dummy = np.random.rand(10)
-        model.fit(X_dummy, y_dummy)
-        
+        model = pickle.load(open('model.pkl', 'rb'))
+              
         return model
     except Exception as e:
         st.error(f"Error loading model: {e}")
