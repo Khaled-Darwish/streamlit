@@ -15,9 +15,6 @@ st.set_page_config(
 
 
 st.header("Virtual Screening")
-st.warning("""
-[Click here to see example for input format](https://drive.google.com/file/d/1Qa-0JKVa9ccuSMd4Km6Z5nP-RLeT1Gp0/view?usp=sharing)
-""")
 
 def PUbchemfp_desc_calc():
     # Performs the descriptor calculation
