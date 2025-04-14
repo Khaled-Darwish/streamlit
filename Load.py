@@ -1,7 +1,8 @@
 import streamlit as st
 import numpy as np
 from rdkit import Chem
-from rdkit.Chem import AllChem
+from rdkit.Chem import AllChem, Draw
+from rdkit.Chem.Draw import MolToImage
 from sklearn.ensemble import RandomForestRegressor
 import pickle
 
@@ -41,8 +42,13 @@ def smiles_to_pubchem_fp(smiles):
 def load_model():
     try:
         # Example: Load a pre-trained model
-        model = pickle.load(open("model.pkl", "rb"))
+        # model = pickle.load(open("rf_pubchem_model.pkl", "rb"))
         
+        # For demo: Train a dummy model
+        model = RandomForestRegressor(n_estimators=100, random_state=42)
+        X_dummy = np.random.rand(100, 881)  # 100 random samples
+        y_dummy = np.random.rand(100) * 10   # Random IC50 (0-10 nM)
+        model.fit(X_dummy, y_dummy)
         return model
     except Exception as e:
         st.error(f"❌ Model loading failed: {str(e)}")
