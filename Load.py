@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 from rdkit import Chem
-from rdkit.Chem import AllChem
+from rdkit.Chem import AllChem, Draw
 from sklearn.ensemble import RandomForestRegressor
 import pickle
 import os
@@ -32,21 +32,18 @@ def smiles_to_pubchem_fp(smiles):
     except:
         return None
 
-# Load model (in production, you would load your pretrained model)
-# This is a placeholder - replace with your actual model loading code
+# Load model function
 def load_model():
-    # Try to load a pretrained model
-    try:
-        # In a real app, you would load your saved model file
-        model = pickle.load(open('model.pkl', 'rb'))
-              
-        return model
-    except Exception as e:
-        st.error(f"Error loading model: {e}")
-        return None
+    # In a real app, you would load your pretrained model
+    # Example:
+    if os.path.exists('model.pkl'):
+         return pickle.load(open('rf_pubchem_model.pkl', 'rb'))
+        
+    return model
 
-# Load the model
-model = load_model()
+# Load the model (only once when app starts)
+if 'model' not in st.session_state:
+    st.session_state.model = load_model()
 
 # Input SMILES
 smiles_input = st.text_input('Enter SMILES notation:', 'CCO')
@@ -61,20 +58,27 @@ if st.button('Predict IC50'):
         if fp is None:
             st.error('Invalid SMILES string or unable to generate fingerprint.')
         else:
-            # Make prediction
+            # Make prediction using the model (not the fingerprint)
             try:
-                prediction = model.predict(fp.reshape(1, -1))[0]
+                # Reshape the fingerprint for prediction (1 sample, many features)
+                fp_reshaped = fp.reshape(1, -1)
+                
+                # Get model from session state
+                model = st.session_state.model
+                
+                # Predict
+                prediction = model.predict(fp_reshaped)[0]
                 st.success(f'Predicted IC50: {prediction:.2f} nM')
                 
                 # Display molecule
                 mol = Chem.MolFromSmiles(smiles_input)
                 if mol:
                     st.write('Chemical structure:')
-                    img = Chem.Draw.MolToImage(mol, size=(300, 300))
+                    img = Draw.MolToImage(mol, size=(300, 300))
                     st.image(img, caption='Input Molecule')
                 
             except Exception as e:
-                st.error(f'Prediction failed: {e}')
+                st.error(f'Prediction failed: {str(e)}')
 
 # Example SMILES
 st.subheader('Example SMILES')
