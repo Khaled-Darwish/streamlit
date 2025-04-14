@@ -1,6 +1,9 @@
 import streamlit as st
 import numpy as np
 from rdkit import Chem
+from rdkit.Chem import AllChem  # <-- This is the critical fix
+from rdkit.Chem import Draw
+from rdkit.Chem.Draw import MolToImage
 from sklearn.ensemble import RandomForestRegressor
 import pickle
 
@@ -26,11 +29,11 @@ def smiles_to_pubchem_fp(smiles):
             st.error("❌ Invalid SMILES: Could not parse molecule.")
             return None
         
-        # Add Hydrogens (optional, improves fingerprint accuracy)
+        # Add Hydrogens (optional but recommended)
         mol = Chem.AddHs(mol)  
         
         # Generate hashed Morgan fingerprint (radius=2, nBits=881)
-        fp = AllChem.GetHashedMorganFingerprint(mol, radius=2, nBits=881)
+        fp = AllChem.GetHashedMorganFingerprint(mol, radius=2, nBits=881)  # <-- Now works
         return np.array(fp)
     except Exception as e:
         st.error(f"❌ Error generating fingerprint: {str(e)}")
