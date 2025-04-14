@@ -52,11 +52,6 @@ if st.button('Predict'):
     st.markdown(reading_data.to_html(escape=False, index=False), unsafe_allow_html=True)
    ## st.write(reading_data)
 
-
-
-    PUbchemfp_desc_calc()
-
- 
     st.subheader('Generated PubChem_Fingerprints')
     pubfp_calc = pd.read_csv("descriptors_output.csv")
     pubfp_calc.drop('Name', axis=1, inplace=True)
