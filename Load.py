@@ -21,7 +21,7 @@ def generate_pubchem_fingerprint(smiles):
 
 # --- Load the trained model ---
 try:
-    with open('RFC_model.pkl', 'rb') as file:
+    with open('model.pkl', 'rb') as file:
         model = pickle.load(file)
 except Exception as e:
     st.error(f"Error loading the model: {e}")
