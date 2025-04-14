@@ -6,7 +6,6 @@ import joblib
 from rdkit import Chem
 from rdkit.Chem import Descriptors
 from rdkit.ML.Descriptors import MoleculeDescriptors
-from rdkit.Chem import Draw
 from io import BytesIO
 import base64
 
