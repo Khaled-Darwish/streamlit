@@ -53,7 +53,7 @@ def smiles_to_image(smiles, mol_size=(200, 200)):
 
 # Model
 def the_model(input_data):
-    load_model = joblib.load('rf_model.pkl')
+    load_model = joblib.load('model.pkl')
     # Make prediction
     prediction = load_model.predict(input_data)
     prediction_probability=load_model.predict_proba(input_data)
