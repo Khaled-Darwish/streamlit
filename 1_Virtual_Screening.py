@@ -11,19 +11,6 @@ import base64
 
 st.header("Virtual Screening")
 
-def descriptors(smiles):
-    mols = [Chem.MolFromSmiles(s) for s in smiles] 
-    calc = MoleculeDescriptors.MolecularDescriptorCalculator([x[0] for x in Descriptors._descList])
-    desc_names = calc.GetDescriptorNames()
-    
-    Mol_descriptors =[]
-    for mol in mols:
-
-        descriptors = calc.CalcDescriptors(mol)
-        Mol_descriptors.append(descriptors)
-    return Mol_descriptors,desc_names 
-
-
 # Model
 def the_model(input_data):
     load_model = joblib.load('rf_model.pkl')
