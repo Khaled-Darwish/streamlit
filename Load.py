@@ -36,7 +36,7 @@ def load_model():
     # In a real app, you would load your pretrained model
     # Example:
     if os.path.exists('model.pkl'):
-         return pickle.load(open('rf_pubchem_model.pkl', 'rb'))
+         return pickle.load(open('model.pkl', 'rb'))
         
     return model
 
