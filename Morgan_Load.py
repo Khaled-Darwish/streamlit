@@ -12,11 +12,13 @@ def load_model(path):
     return joblib.load(path)
 
 # ---------------- Fingerprint Function (Morgan) ----------------
-def get_morgan_fingerprint(smiles, radius=3, nBits=2048):
+generator = MorganGenerator(radius=3, fpSize=2048)
+
+def get_morgan_fingerprint(smiles):
     mol = Chem.MolFromSmiles(smiles)
     if mol is None:
         return None
-    fp = AllChem.GetMorganFingerprintAsBitVect(mol, radius, nBits=nBits)
+    fp = generator.GetFingerprint(mol)
     arr = np.zeros((1,), dtype=int)
     DataStructs.ConvertToNumpyArray(fp, arr)
     return arr
@@ -29,7 +31,9 @@ def predict_ic50(smiles_list, model):
         if fp is None:
             results.append((smi, "Invalid SMILES"))
         else:
-            pred = model.predict([fp])[0]
+            # Use feature names to avoid sklearn warning
+            df = pd.DataFrame([fp], columns=[f'bit_{i}' for i in range(len(fp))])
+            pred = model.predict(df)[0]
             results.append((smi, pred))
     return pd.DataFrame(results, columns=["SMILES", "Predicted IC50"])
 
