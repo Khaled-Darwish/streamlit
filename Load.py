@@ -6,14 +6,19 @@ import numpy as np
 from rdkit import Chem
 from sklearn.ensemble import RandomForestRegressor
 
-# Function to calculate PubChem fingerprints
-def calculate_maccs_fingerprint(smiles):
-    """Calculates the MACCS fingerprint for a given SMILES string."""
-    mol = Chem.MolFromSmiles(smiles)
-    if mol:
-        fp = MACCSkeys.GenMACCSKeys(mol)
-        return np.array(fp)
-    return None
+# --- Function to generate PubChem fingerprints from SMILES ---
+def generate_pubchem_fingerprint(smiles):
+    try:
+        mol = Chem.MolFromSmiles(smiles)
+        if mol:
+            fp = AllChem.GetPubChemFingerprint(mol)
+            # Convert the fingerprint to a NumPy array
+            return np.array(list(fp))
+        else:
+            return None
+    except Exception as e:
+        st.error(f"Error processing SMILES: {e}")
+        return None
 
 # Load the Random Forest model from the pkl file
 @st.cache_resource
