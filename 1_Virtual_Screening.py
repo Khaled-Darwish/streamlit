@@ -10,10 +10,6 @@ from rdkit.Chem import Draw
 from io import BytesIO
 import base64
 
-st.set_page_config(
-    page_title="Virtual Screening")
-
-
 st.header("Virtual Screening")
 
 def PUbchemfp_desc_calc():
@@ -35,18 +31,6 @@ def descriptors(smiles):
         Mol_descriptors.append(descriptors)
     return Mol_descriptors,desc_names 
 
-def smiles_to_image(smiles, mol_size=(200, 200)):
-    mol = Chem.MolFromSmiles(smiles)
-    if mol:
-        img = Draw.MolToImage(mol, size=mol_size)
-        buffer = BytesIO()
-        img.save(buffer, format="PNG")
-        buffer.seek(0)
-        img_str = base64.b64encode(buffer.read()).decode()
-        return f'<img src="data:image/png;base64,{img_str}" alt="Molecule">'
-    else:
-        return "Invalid SMILES"	
-    
 
 # Model
 def the_model(input_data):
