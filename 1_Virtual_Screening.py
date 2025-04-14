@@ -52,9 +52,7 @@ if st.button('Predict'):
     st.markdown(reading_data.to_html(escape=False, index=False), unsafe_allow_html=True)
    ## st.write(reading_data)
 
-   
-    
-    the_model(pubfp_calc)
+
 else:
     st.warning('Limit 250 compounds per file')
     
