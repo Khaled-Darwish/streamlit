@@ -7,7 +7,7 @@ from io import BytesIO
 # 🎯 Page configuration
 st.set_page_config(page_title="Activity Predictor", layout="centered")
 
-st.title("🔬 Activity Predictor using KNN Model")
+st.title("🔬 Activity Predictor using KNN Model NOW")
 st.markdown("Upload your trained KNN model and a CSV file of compounds with PubChem fingerprints.")
 
 # 📤 Upload model
