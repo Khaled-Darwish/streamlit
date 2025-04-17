@@ -4,7 +4,7 @@ import pickle
 from sklearn.neighbors import KNeighborsClassifier
 from io import BytesIO
 
-st.set_page_config(page_title="KNN SMILES Predictor", layout="centered")
+st.set_page_config(page_title="KNN SMILES Predictor on PTP1B Target", layout="centered")
 
 st.title("🧪 KNN SMILES Activity Predictor")
 st.write("Upload a trained **KNN model (.pkl)** and a **CSV file** with SMILES and 881-bit PubChem fingerprints to predict activity (0 or 1).")
