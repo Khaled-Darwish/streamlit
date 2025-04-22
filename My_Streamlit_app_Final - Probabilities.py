@@ -43,7 +43,7 @@ if model_file and csv_file:
             df['Probability_Class_1'] = probs[:, 1]
 
             st.subheader("✅ Prediction Results")
-            st.dataframe(df[['SMILES', 'Predicted_Activity', 'Probability_Class_Inactive', 'Probability_Class_Active']].head())
+            st.dataframe(df[['SMILES', 'Predicted_Activity', 'Probability_Class_0', 'Probability_Class_1']].head())
 
             # Download button
             def convert_df_to_csv(df):
