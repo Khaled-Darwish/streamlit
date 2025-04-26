@@ -1,62 +1,76 @@
 import streamlit as st
 import pandas as pd
-import pickle
+import joblib
 from sklearn.neighbors import KNeighborsClassifier
-from io import BytesIO
+import tempfile
 
-st.set_page_config(page_title="KNN SMILES Predictor on PTP1B Target", layout="centered")
+# Streamlit app title
+st.title("Molecular Activity Prediction App")
 
-st.title("🧪 KNN SMILES Activity Predictor on PTP1B Target")
-st.write("Upload a trained **KNN model (.pkl)** and a **CSV file** with SMILES and 881-bit PubChem fingerprints to predict activity (0 or 1).")
+st.write("""
+Upload your trained **KNN model (.pkl)** and a **fingerprint CSV file** to predict activities.
+""")
 
-# Upload model
-model_file = st.file_uploader("🔍 Upload your trained KNN model (.pkl)", type=["pkl"])
+# Upload model file
+model_file = st.file_uploader("Upload your trained model (.pkl)", type=["pkl"])
 
-# Upload CSV
-csv_file = st.file_uploader("📄 Upload your fingerprint CSV file (.csv)", type=["csv"])
+# Upload CSV file
+csv_file = st.file_uploader("Upload your fingerprint CSV file", type=["csv"])
 
 if model_file and csv_file:
     try:
         # Load model
-        knn_model = pickle.load(model_file)
+        with tempfile.NamedTemporaryFile(delete=False) as tmp_model:
+            tmp_model.write(model_file.read())
+            knn_model = joblib.load(tmp_model.name)
 
-        # Load CSV data
+        # Confirm model type
+        if not hasattr(knn_model, 'predict'):
+            st.error("The uploaded model is not a valid scikit-learn model with a predict() method.")
+            st.stop()
+
+        # Load CSV
         df = pd.read_csv(csv_file)
-        st.subheader("📊 Preview of Uploaded Data")
+
+        st.success("Files uploaded and loaded successfully!")
+
+        # Show first few rows
+        st.subheader("First few rows of the input CSV")
         st.dataframe(df.head())
 
-        # Check that there's at least 882 columns (SMILES + 881 bits)
-        if df.shape[1] < 882:
-            st.error("The CSV should contain a 'SMILES' column followed by 881 fingerprint bit columns.")
-        else:
-            # Extract SMILES and fingerprint data
-            smiles = df.iloc[:, 0]
-            X = df.iloc[:, 1:882]
+        # Extract features
+        X = df.iloc[:, 1:882]  # Adjust if needed
 
-            # Make predictions
-            preds = knn_model.predict(X)
-            probs = knn_model.predict_proba(X)
+        # Predict
+        st.subheader("Making Predictions...")
+        predictions = knn_model.predict(X)
+        probabilities = knn_model.predict_proba(X)
 
-            # Add predictions to DataFrame
-            df['Predicted_Activity'] = preds
-            df['Probability_Class_0'] = probs[:, 0]
-            df['Probability_Class_1'] = probs[:, 1]
+        # Add predictions
+        df['Predicted_Activity'] = predictions
+        df['Probability_Class_0'] = probabilities[:, 0]
+        df['Probability_Class_1'] = probabilities[:, 1]
 
-            st.subheader("✅ Prediction Results")
-            st.dataframe(df[['SMILES', 'Predicted_Activity', 'Probability_Class_0', 'Probability_Class_1']].head())
+        # Display updated DataFrame
+        st.subheader("Prediction Results")
+        st.dataframe(df)
 
-            # Download button
-            def convert_df_to_csv(df):
-                return df.to_csv(index=False).encode('utf-8')
+        # Download option
+        @st.cache_data
+        def convert_df(df):
+            return df.to_csv(index=False).encode('utf-8')
 
-            csv_data = convert_df_to_csv(df)
-            st.download_button(
-                label="📥 Download Prediction Results",
-                data=csv_data,
-                file_name='knn_predictions.csv',
-                mime='text/csv'
-            )
+        csv_download = convert_df(df)
+
+        st.download_button(
+            label="Download Predictions as CSV",
+            data=csv_download,
+            file_name='predictions_output.csv',
+            mime='text/csv',
+        )
+
     except Exception as e:
-        st.error(f"⚠️ An error occurred: {e}")
+        st.error(f"An error occurred: {e}")
+
 else:
-    st.info("Please upload both a KNN `.pkl` model and a fingerprint `.csv` file to continue.")
+    st.info("Please upload both a model file and a CSV file.")
